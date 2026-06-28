@@ -5,38 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Бьюти Учет Клиентов</title>
     <style>
-        /* Полная адаптация под мобильный экран */
         body {
             background-color: #f5f6fa;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
+            margin: 0; padding: 0; display: flex; justify-content: center;
         }
         .phone-wrapper {
-            width: 100%;
-            max-width: 480px;
-            height: 100vh;
-            background-color: #f5f6fa;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
+            width: 100%; max-width: 480px; height: 100vh;
+            background-color: #f5f6fa; display: flex; flex-direction: column; box-sizing: border-box;
         }
-        .app-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            overflow-y: auto;
-        }
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            margin-bottom: 15px;
-        }
+        .app-container { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow-y: auto; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; }
         h1 { font-size: 22px; font-weight: bold; color: #6c5ce7; margin: 0; }
         .nav-btn {
             background: #fff; border: 1px solid #6c5ce7; color: #6c5ce7;
@@ -52,21 +31,23 @@
         input:focus { border-color: #6c5ce7; }
         .submit-btn {
             background-color: #6c5ce7; color: #fff; padding: 14px;
-            border: none; border-radius: 10px; font-size: 16px; font-weight: bold; 
-            min-height: 50px; cursor: pointer;
+            border: none; border-radius: 10px; font-size: 16px; font-weight: bold; min-height: 50px; cursor: pointer;
         }
         .calendar-section { background: #fff; padding: 14px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; }
+        .calendar-header-row { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .cal-arrow { cursor: pointer; padding: 5px 20px; font-size: 24px; color: #6c5ce7; font-weight: bold; user-select: none; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; margin-top: 12px; }
         .calendar-day-name { font-size: 12px; font-weight: bold; color: #7f8c8d; padding-bottom: 4px; }
         .calendar-cell { 
             padding: 12px 0; font-size: 15px; border-radius: 8px; cursor: pointer; 
-            position: relative; font-weight: 600; min-height: 44px; box-sizing: border-box;
+            position: relative; font-weight: 600; min-height: 44px; box-sizing: border-box; color: #2f3640;
         }
         .calendar-cell.active-day { background: #6c5ce7 !important; color: #fff !important; }
         .has-event::after {
             content: ''; position: absolute; bottom: 4px; left: 50%;
-            transform: translateX(-50%); width: 5px; height: 5px; background-color: #ff4757; border-radius: 50%;
+            transform: translateX(-50%); width: 6px; height: 6px; background-color: #ff4757; border-radius: 50%;
         }
+        .calendar-cell.active-day::after { background-color: #fff; }
         .client-list { flex: 1; }
         .section-title { font-size: 14px; font-weight: bold; color: #7f8c8d; margin-bottom: 12px; }
         .card {
@@ -83,20 +64,20 @@
             background: #ffeae6; border: none; color: #ff4757; cursor: pointer; 
             font-weight: bold; padding: 8px 14px; border-radius: 8px; font-size: 13px; min-height: 36px;
         }
+        .app-container::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
     <div class="phone-wrapper">
         <div class="app-container">
-            
-            <!-- Мобильная шапка -->
+            <!-- Мобильный Хедер -->
             <div class="header-bar">
                 <button id="backBtn" class="nav-btn" style="display: none;" onclick="switchScreen('main')">← Назад</button>
                 <h1 id="screenTitle">Бьюти Учет</h1>
                 <button id="calBtn" class="nav-btn" onclick="switchScreen('calendar')">📅 Календарь</button>
             </div>
 
-            <!-- ЭКРАН 1: Форма добавления -->
+            <!-- Главный Экран Ввода -->
             <div id="mainScreen">
                 <div class="form">
                     <input type="text" id="nameInput" placeholder="Имя клиента">
@@ -108,35 +89,35 @@
                 <div class="section-title">Все предстоящие записи:</div>
             </div>
 
-            <!-- ЭКРАН 2: Мобильный Календарь -->
+            <!-- Экран Календаря-Планировщика -->
             <div id="calendarScreen" style="display: none;">
                 <div class="calendar-section">
-                    <div style="text-align: center; font-weight: bold; font-size: 16px;" id="monthYearLabel"></div>
+                    <div class="calendar-header-row">
+                        <span class="cal-arrow" onclick="changeMonth(-1)">‹</span>
+                        <span id="monthYearLabel"></span>
+                        <span class="cal-arrow" onclick="changeMonth(1)">›</span>
+                    </div>
                     <div class="calendar-grid" id="calendarGrid"></div>
                 </div>
                 <div class="section-title" id="filterTitle">Выберите день</div>
             </div>
 
-            <!-- Список клиентов -->
+            <!-- Общий контейнер для вывода записей клиентов -->
             <div class="client-list" id="clientList"></div>
-
         </div>
     </div>
     <script>
-        // Загрузка данных из локальной памяти браузера
-        let clients = JSON.parse(localStorage.getItem('beauty_calendar_crm_v3')) || [];
+        // Работаем со стабильной версией локальной памяти смартфона
+        let clients = JSON.parse(localStorage.getItem('beauty_calendar_final_crm')) || [];
         let currentScreen = 'main';
         let selectedFilterDate = null;
-        
-        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Теперь берется реальная текущая дата и свободно меняется
-        let displayDate = new Date(); 
+        let displayDate = new Date(); // Автоматический старт с текущего месяца реального времени
 
         function formatDate(dateString) {
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
-        // Переключение между экранами
         function switchScreen(screen) {
             currentScreen = screen;
             if (screen === 'main') {
@@ -157,26 +138,26 @@
             renderClients();
         }
 
-        // Отрисовка списка клиентов
         function renderClients() {
             const listContainer = document.getElementById('clientList');
             listContainer.innerHTML = '';
 
             let filtered = [...clients];
+            
             if (currentScreen === 'calendar' && selectedFilterDate) {
                 filtered = clients.filter(c => c.date.startsWith(selectedFilterDate));
                 const formattedDay = new Date(selectedFilterDate).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'});
                 document.getElementById('filterTitle').innerText = `Записи на ${formattedDay}:`;
             } else if (currentScreen === 'calendar') {
                 document.getElementById('filterTitle').innerText = `Выберите день на календаре`;
-                return;
+                return; // На экране календаря не показываем всё подряд, пока день не выбран
             }
 
-            // Сортировка по времени
+            // Надежная сортировка от самых близких к поздним записям
             filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             if (filtered.length === 0 && currentScreen === 'calendar') {
-                listContainer.innerHTML = '<div style="text-align:center; color:#7f8c8d; margin-top:20px;">На этот день записей нет</div>';
+                listContainer.innerHTML = '<div style="text-align:center; color:#7f8c8d; margin-top:20px; font-size:15px;">На этот день записей нет</div>';
                 return;
             }
 
@@ -196,54 +177,49 @@
             });
         }
 
-        // Функция изменения месяца (вперед / назад)
         function changeMonth(direction) {
             displayDate.setMonth(displayDate.getMonth() + direction);
             generateCalendarGrid();
             renderClients();
         }
 
-        // Генерация интерактивного бесконечного календаря
         function generateCalendarGrid() {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
+            
             const year = displayDate.getFullYear();
             const month = displayDate.getMonth();
 
-            // Создаем красивую шапку месяца с кнопками-стрелками для перелистывания
-            const monthText = displayDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).toUpperCase();
-            document.getElementById('monthYearLabel').innerHTML = `
-                <span onclick="changeMonth(-1)" style="cursor:pointer; padding: 0 15px; font-size:20px; color:#6c5ce7;">‹</span>
-                <span>${monthText}</span>
-                <span onclick="changeMonth(1)" style="cursor:pointer; padding: 0 15px; font-size:20px; color:#6c5ce7;">›</span>
-            `;
+            // Пишем месяц в шапку
+            document.getElementById('monthYearLabel').innerText = displayDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).toUpperCase();
 
+            // Шапка дней недели
             const daysNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             daysNames.forEach(d => grid.innerHTML += `<div class="calendar-day-name">${d}</div>`);
 
+            // Индекс первого дня месяца
             let firstDayIndex = new Date(year, month, 1).getDay() - 1;
             if (firstDayIndex === -1) firstDayIndex = 6;
 
             const totalDays = new Date(year, month + 1, 0).getDate();
 
-            for (let i = 0; i < firstDayIndex; i++) grid.innerHTML += '<div></div>';
+            // Пустые ячейки смещения
+            for (let i = 0; i < firstDayIndex; i++) {
+                grid.innerHTML += '<div></div>';
+            }
 
+            // Заполнение сетки числами
             for (let day = 1; day <= totalDays; day++) {
                 const dayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Ищем записи именно на этот конкретный год-месяц-день
                 const hasBooking = clients.some(c => c.date.startsWith(dayString));
+                
                 const isSelected = selectedFilterDate === dayString ? 'active-day' : '';
                 const eventClass = hasBooking ? 'has-event' : '';
 
-                grid.innerHTML += `<div class="calendar-cell ${isSelected} ${eventClass}" onclick="selectCalendarDay('${dateString}')" data-date="${dayString}">${day}</div>`;
+                grid.innerHTML += `<div class="calendar-cell ${isSelected} ${eventClass}" onclick="selectCalendarDay('${dayString}')">${day}</div>`;
             }
-            
-            // Исправление вызова клика
-            const cells = grid.querySelectorAll('.calendar-cell');
-            cells.forEach(cell => {
-                cell.addEventListener('click', function() {
-                    selectCalendarDay(this.getAttribute('data-date'));
-                });
-            });
         }
 
         function selectCalendarDay(dateStr) {
@@ -259,7 +235,7 @@
             const dateInput = document.getElementById('dateInput');
 
             if (!nameInput.value || !serviceInput.value || !priceInput.value || !dateInput.value) {
-                alert('Заполните все поля!');
+                alert('Заполните все поля ввода!');
                 return;
             }
 
@@ -268,11 +244,12 @@
                 name: nameInput.value.trim(),
                 service: serviceInput.value.trim(),
                 price: priceInput.value.trim(),
-                date: dateInput.value
+                date: dateInput.value // Сохраняет формат ГГГГ-ММ-ДДTHH:MM
             };
 
             clients.push(newClient);
-            localStorage.setItem('beauty_calendar_crm_v3', JSON.stringify(clients));
+            localStorage.setItem('beauty_calendar_final_crm', JSON.stringify(clients));
+            
             nameInput.value = ''; serviceInput.value = ''; priceInput.value = ''; dateInput.value = '';
             renderClients();
         }
@@ -280,15 +257,14 @@
         function deleteClient(id) {
             if (confirm('Удалить эту запись?')) {
                 clients = clients.filter(c => c.id !== id);
-                localStorage.setItem('beauty_calendar_crm_v3', JSON.stringify(clients));
+                localStorage.setItem('beauty_calendar_final_crm', JSON.stringify(clients));
                 if (currentScreen === 'calendar') generateCalendarGrid();
                 renderClients();
             }
         }
 
+        // Старт системы
         renderClients();
     </script>
 </body>
 </html>
-
-
