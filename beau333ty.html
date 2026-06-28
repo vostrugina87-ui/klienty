@@ -123,22 +123,20 @@
         </div>
     </div>
     <script>
-        // Инициализация актуальной даты
-        const defaultClients = [
-            { id: '1', name: 'Анна', service: 'Маникюр', price: '1500', date: '2026-06-29T12:00' },
-            { id: '2', name: 'Мария', service: 'Окрашивание', price: '4500', date: '2026-06-28T18:30' }
-        ];
-
-        let clients = JSON.parse(localStorage.getItem('beauty_calendar_crm_v3')) || defaultClients;
+        // Загрузка данных из локальной памяти браузера
+        let clients = JSON.parse(localStorage.getItem('beauty_calendar_crm_v3')) || [];
         let currentScreen = 'main';
         let selectedFilterDate = null;
-        let displayDate = new Date(); // Берет текущий реальный месяц
+        
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Теперь берется реальная текущая дата и свободно меняется
+        let displayDate = new Date(); 
 
         function formatDate(dateString) {
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
+        // Переключение между экранами
         function switchScreen(screen) {
             currentScreen = screen;
             if (screen === 'main') {
@@ -159,6 +157,7 @@
             renderClients();
         }
 
+        // Отрисовка списка клиентов
         function renderClients() {
             const listContainer = document.getElementById('clientList');
             listContainer.innerHTML = '';
@@ -173,6 +172,7 @@
                 return;
             }
 
+            // Сортировка по времени
             filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             if (filtered.length === 0 && currentScreen === 'calendar') {
@@ -196,13 +196,27 @@
             });
         }
 
+        // Функция изменения месяца (вперед / назад)
+        function changeMonth(direction) {
+            displayDate.setMonth(displayDate.getMonth() + direction);
+            generateCalendarGrid();
+            renderClients();
+        }
+
+        // Генерация интерактивного бесконечного календаря
         function generateCalendarGrid() {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
             const year = displayDate.getFullYear();
             const month = displayDate.getMonth();
 
-            document.getElementById('monthYearLabel').innerText = displayDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).toUpperCase();
+            // Создаем красивую шапку месяца с кнопками-стрелками для перелистывания
+            const monthText = displayDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).toUpperCase();
+            document.getElementById('monthYearLabel').innerHTML = `
+                <span onclick="changeMonth(-1)" style="cursor:pointer; padding: 0 15px; font-size:20px; color:#6c5ce7;">‹</span>
+                <span>${monthText}</span>
+                <span onclick="changeMonth(1)" style="cursor:pointer; padding: 0 15px; font-size:20px; color:#6c5ce7;">›</span>
+            `;
 
             const daysNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             daysNames.forEach(d => grid.innerHTML += `<div class="calendar-day-name">${d}</div>`);
@@ -220,8 +234,16 @@
                 const isSelected = selectedFilterDate === dayString ? 'active-day' : '';
                 const eventClass = hasBooking ? 'has-event' : '';
 
-                grid.innerHTML += `<div class="calendar-cell ${isSelected} ${eventClass}" onclick="selectCalendarDay('${dayString}')">${day}</div>`;
+                grid.innerHTML += `<div class="calendar-cell ${isSelected} ${eventClass}" onclick="selectCalendarDay('${dateString}')" data-date="${dayString}">${day}</div>`;
             }
+            
+            // Исправление вызова клика
+            const cells = grid.querySelectorAll('.calendar-cell');
+            cells.forEach(cell => {
+                cell.addEventListener('click', function() {
+                    selectCalendarDay(this.getAttribute('data-date'));
+                });
+            });
         }
 
         function selectCalendarDay(dateStr) {
@@ -268,4 +290,5 @@
     </script>
 </body>
 </html>
+
 
